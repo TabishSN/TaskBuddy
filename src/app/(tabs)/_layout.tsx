@@ -1,9 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
+import { TabBarIcon } from '@/src/components/navigation/TabBarIcon';
+import { Colors } from '@/src/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -14,13 +16,20 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
       }}>
+        <Tabs.Screen
+        name="authentication/login"
+        options={{
+          title: 'login',
+          tabBarIcon: ({ color, focused }) => (
+            <FontAwesomeIcon icon={faUser} color={color}/>          ),
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
+            <FontAwesomeIcon icon={faUser} color={color}/>          ),
         }}
       />
       <Tabs.Screen
