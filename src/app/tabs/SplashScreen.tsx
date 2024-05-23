@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Image, StyleSheet, Text, Touchable, TouchableOpacity } from 'react-native';
-import SignIn from './authentication/SignIn';
 import { useNavigation } from 'expo-router';
 
 
@@ -9,22 +8,23 @@ const SplashScreen = () => {
   const navigation = useNavigation();
   
   const handleSignInPress = () =>{
-    navigation.navigate('SignIn');
+    navigation.navigate('SignUp' as never);
   };
 
 
 
   return (
     <View style={styles.container}>
+      {/* <Image style = {styles.splashWave} source={require('@/assets/images/Wave.png')}/> */}
       <Image style={styles.splashLogo} source={require("@/assets/images/TaskBuddyLogo.png")} />
       <View style={styles.textContainer}>
         <Text style={styles.splashSubtitle}>Your ultimate companion for staying organized, productive, and connected with friends.</Text>
       </View>
       <View>
-        <TouchableOpacity onPress={SignIn}>
+        <TouchableOpacity>
             <Text style={styles.splashSignIn}>Sign In</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp' as never)}>
             <Text style={styles.splashSignUp}>Sign Up</Text>
         </TouchableOpacity>
       </View>
@@ -87,6 +87,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
+  },
+  splashWave:{
+    width:450,
+    height: undefined,
+    aspectRatio: 3,
+    zIndex: -1
   }
 });
 

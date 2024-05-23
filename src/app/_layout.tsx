@@ -5,6 +5,7 @@ import 'react-native-reanimated';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import SplashScreen from './tabs/SplashScreen';
+import SignUp from './tabs/authentication/SignUp';
 
 const Stack = createNativeStackNavigator();
 
@@ -13,9 +14,10 @@ export default function RootLayout() {
 
 
   return (
-    <NavigationContainer independent={true} options={{ headerShown: false }}>
+    <NavigationContainer independent={true}>
       <Stack.Navigator>
-        <Stack.Screen name='tabs/SplashScreen' component={SplashScreen}/>
+        <Stack.Screen name='SplashScreen' component={SplashScreen}/>
+        <Stack.Screen name='SignUp' component={SignUp}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

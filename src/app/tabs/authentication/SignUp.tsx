@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, View, TextInput, StyleSheet, Button } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-const SignIn = () => {
+const SignUp = () => {
   const [username, setUsername] = useState('@');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,4 +72,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default SignIn;
+export default SignUp;
