@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
-import { Text, View, TextInput, StyleSheet } from 'react-native';
+import { Text, View, TextInput, StyleSheet, Button } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-const Login = () => {
-  const [username, setUsername] = useState('');
+const SignIn = () => {
+  const [username, setUsername] = useState('@');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignIn, setIsSignIn] = useState(true);
 
+  const handleUsernameChange = (text: string) => {
+    // Ensure username is always lowercase and has '@' symbol
+    setUsername('@' + text.toLowerCase());
+  };
+
   return (
-    <View style = {styles.loginContainer}>
-      <Text style={styles.login}>{isSignIn ? 'Sign In' : 'Sign Up'}</Text>
+    <View style = {styles.signinContainer}>
+      <Text style={styles.signin}>{isSignIn ? 'Sign In' : 'Sign Up'}</Text>
 
       <TextInput
         style={styles.input}
@@ -30,14 +35,16 @@ const Login = () => {
         onChangeText={setPassword}
         placeholder="Password"
       />
-
-      {/* Add additional fields (email, password) similarly */}
+      <View style={styles.buttonContainer}>
+        <Button title={isSignIn ? 'Sign In' : 'Sign Up'}></Button>
+      </View>
     </View>
+
   );
 };
 
 const styles = StyleSheet.create({
-    login: {
+    signin: {
         fontSize: 24,
         textAlign: 'center',
         marginVertical: 20,
@@ -52,13 +59,17 @@ const styles = StyleSheet.create({
         width:'80%',
         color: 'black',
       },
-      loginContainer:{
+      signinContainer:{
         flex: 1,
         alignItems: 'center',
         justifyContent:'center',
         backgroundColor: Colors.white
+      },
+      buttonContainer:{
+        backgroundColor: '#007bff',
+        borderRadius: 5
       }
 
 });
 
-export default Login;
+export default SignIn;

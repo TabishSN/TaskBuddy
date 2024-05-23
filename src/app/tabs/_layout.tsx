@@ -17,9 +17,9 @@ export default function TabLayout() {
         headerShown: false,
       }}>
         <Tabs.Screen
-        name="authentication/login"
+        name="SplashScreen"
         options={{
-          title: 'login',
+          title: 'SplashScreen',
           tabBarIcon: ({ color, focused }) => (
             <FontAwesomeIcon icon={faUser} color={color}/>          ),
         }}
