@@ -7,12 +7,6 @@ import { useNavigation } from 'expo-router';
 const SplashScreen = () => {
   const navigation = useNavigation();
   
-  const handleSignInPress = () =>{
-    navigation.navigate('SignUp' as never);
-  };
-
-
-
   return (
     <View style={styles.container}>
       {/* <Image style = {styles.splashWave} source={require('@/assets/images/Wave.png')}/> */}
@@ -21,8 +15,8 @@ const SplashScreen = () => {
         <Text style={styles.splashSubtitle}>Your ultimate companion for staying organized, productive, and connected with friends.</Text>
       </View>
       <View>
-        <TouchableOpacity>
-            <Text style={styles.splashSignIn}>Sign In</Text>
+        <TouchableOpacity onPress={(()=> navigation.navigate('LogIn' as never))}>
+            <Text style={styles.splashSignIn}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp' as never)}>
             <Text style={styles.splashSignUp}>Sign Up</Text>
