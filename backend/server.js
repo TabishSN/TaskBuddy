@@ -35,18 +35,26 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+        const query = 'SELECT * FROM users WHERE username = $1';
+        const { rows } = await pool.query(query, [username]);
+        const user = rows[0];
 
-        if (result.rows.length === 1) {
-            res.json({ success: true, message: 'Login successful' });
-        } else {
-            res.status(401).json({ success: false, message: 'Invalid username or password' });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ success: false, message: 'Passwords do not match' });
+        }
+
+        res.status(200).json({ success: true, message: 'Login successful', user });
     } catch (error) {
-        console.error('Error executing query', error);
+        console.error('Error executing query:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
 
 
 app.post('/register', async (req, res) => {

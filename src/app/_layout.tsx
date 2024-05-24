@@ -19,14 +19,25 @@ export default function RootLayout() {
   return (
     <NavigationContainer independent={true}>
       <Stack.Navigator>
-        <Stack.Screen name='SplashScreen' component={SplashScreen}/>
+        <Stack.Screen
+         options={{
+          headerShown:false
+         }}
+        name='SplashScreen' component={SplashScreen}/>
         <Stack.Screen
         options={{
+          headerShown:false,
           headerBackTitle:'Go Back',
           headerBackTitleStyle: { fontSize: 20 }}}
         name='LogIn' 
-        component={LogIn}/>
-        <Stack.Screen name='SignUp' component={SignUp}/>
+        component={LogIn}
+        />
+        <Stack.Screen 
+        options={{
+        headerShown:false
+        }}
+        name='SignUp' 
+        component={SignUp}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -4,6 +4,7 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { faEnvelope, faEye, faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import axios from 'axios';
+import { useNavigation } from 'expo-router';
 
 const SignUp = () => {
   const [username, setUsername] = useState('@');
@@ -11,6 +12,7 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [secureEntry, setSecureEntry] = useState(true);
 
+  const navigation = useNavigation();
   const handleUsernameChange = (text: string) => {
     if(text.startsWith('@')){
       setUsername(text);
@@ -22,7 +24,7 @@ const SignUp = () => {
   const handleRegister = async () => {
     try {
       const response = await axios.post<{ success: boolean; message: string }>(
-        'http://localhost:8000/register',
+        'http://204.236.195.55:8000/register',
         {
           email,
           username,

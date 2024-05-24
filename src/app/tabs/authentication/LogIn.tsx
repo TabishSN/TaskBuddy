@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useState } from 'react';
-import { Text, View, TextInput, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { Text, View, TextInput, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { faEnvelope, faEye, faUser } from '@fortawesome/free-solid-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
@@ -22,6 +22,32 @@ const LogIn = () => {
     }
   
   };
+
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post<{ success: boolean; message: string }>(
+        'http://204.236.195.55:8000/login',
+        {
+          username,
+          password,
+        }
+      );
+      console.log(response.data); // Handle successful response
+      if (response.data.success) {
+        Alert.alert('Success', 'Logged in Successfully');
+        // Additional actions after successful registration
+      } else {
+        Alert.alert('Error', response.data.message);
+      }
+    } catch (error: any) {
+      console.error('Error:', error.response?.data); // Handle error response
+      Alert.alert('Error', 'Registration failed');
+    }
+  };
+
+
+
   return (
     <View style={styles.signinContainer}>
       <Text style={styles.signinTitle}>Welcome{'\n'}Back!</Text>
@@ -50,11 +76,11 @@ const LogIn = () => {
         <FontAwesomeIcon icon={faEye} size={20} color='grey' /> 
         </TouchableOpacity>
       </View>
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </View>
   </View>
   
 
