@@ -1,7 +1,9 @@
 const express = require('express');
 const pool = require('./database/db.js');
 const fs = require ('fs');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -25,7 +27,9 @@ async function createTables(filePath) {
     }
 }
 createTables('./database/taskbuddy.sql');
-
+app.get('/', (req, res) => {
+    res.send('Hello, world!');
+});
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -56,8 +60,10 @@ app.post('/register', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Username already exists' });
         }
 
-        // If username doesn't exist, insert new user into the database
-        const newUser = await pool.query('INSERT INTO users (email, password, username) VALUES ($1, $2, $3) RETURNING *', [email, password, username]);
+        
+	// If username doesn't exist, insert new user into the database
+	const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await pool.query('INSERT INTO users (email, password, username) VALUES ($1, $2, $3) RETURNING *', [email, hashedPassword, username]);
 
         res.status(201).json({ success: true, message: 'User registered successfully', user: newUser.rows[0] });
     } catch (error) {
@@ -66,6 +72,6 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server started on port ${port}`);
 });
