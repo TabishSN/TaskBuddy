@@ -6,6 +6,8 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { faEnvelope, faEye, faUser } from '@fortawesome/free-solid-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import { useNavigation } from 'expo-router';
+
 
 const LogIn = () => {
   const [username, setUsername] = useState('@');
@@ -49,7 +51,7 @@ const LogIn = () => {
 
 
   return (
-    <View style={styles.signinContainer}>
+    <View style={styles.loginContainer}>
       <Text style={styles.signinTitle}>Welcome{'\n'}Back!</Text>
   <View>
     </View>
@@ -81,6 +83,12 @@ const LogIn = () => {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.loginContainer}>
+        <Text>Don't have an account yet? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp' as never)}>
+          <Text style={styles.linkSignUp}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
   </View>
   
 
@@ -108,8 +116,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginBottom: 20,
         paddingLeft: 10,
-        width:'80%',
-        borderRadius:20,
+        borderRadius:10,
         flexDirection: 'row',
         alignItems:'center'
       },
@@ -118,7 +125,7 @@ const styles = StyleSheet.create({
         paddingHorizontal:10,
         fontSize:16
       },
-      signinContainer:{
+      loginContainer:{
         flex: 1,
         alignItems: 'center',
         paddingTop:50,
@@ -127,9 +134,9 @@ const styles = StyleSheet.create({
       buttonContainer:{
         backgroundColor: '#007bff',
         borderRadius: 5,
-        padding:10,
-        paddingRight:40,
-        paddingLeft:40,
+        padding:5,
+        width:'90%',
+        alignItems:'center'
       },
       buttonText:{
         color:'white',
@@ -138,6 +145,13 @@ const styles = StyleSheet.create({
       },
       placeholder:{
         color:'black'
+      },
+      linkSignUp:{
+        backgroundColor: '#007bff',
+        borderRadius: 5,
+        padding:5,
+        width:'90%',
+        alignItems:'center'
       }
 
 });
