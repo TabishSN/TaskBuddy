@@ -26,7 +26,7 @@ async function createTables(filePath) {
         console.error('Error creating tables:', error);
     }
 }
-createTables('./database/taskbuddy.sql');
+createTables('./database/PowerPulse.sql');
 app.get('/', (req, res) => {
     res.send('Hello, world!');
 });

@@ -10,7 +10,7 @@ const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <Image style = {styles.splashWave} source={require('@/assets/images/Wave.png')}/>
-      <Image style={styles.splashLogo} source={require("@/assets/images/TaskBuddyLogo.png")} />
+      <Image style={styles.splashLogo} source={require("@/assets/images/PowerPulseLogo.png")} />
       <View style={styles.textContainer}>
         <Text style={styles.splashSubtitle}>Your ultimate companion for staying organized, productive, and connected with friends.</Text>
       </View>
