@@ -9,6 +9,7 @@ import SignUp from './tabs/authentication/SignUp';
 import LogIn from './tabs/authentication/LogIn';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import Index from './tabs';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,15 +20,36 @@ export default function RootLayout() {
   return (
     <NavigationContainer independent={true}>
       <Stack.Navigator>
-        <Stack.Screen name='SplashScreen' component={SplashScreen}/>
+        <Stack.Screen
+         options={{
+          headerShown:false
+         }}
+        name='SplashScreen' component={SplashScreen}/>
         <Stack.Screen
         options={{
+          headerShown:false,
           headerBackTitle:'Go Back',
           headerBackTitleStyle: { fontSize: 20 }}}
         name='LogIn' 
-        component={LogIn}/>
-        <Stack.Screen name='SignUp' component={SignUp}/>
+        component={LogIn}
+        />
+
+        <Stack.Screen 
+        options={{
+        headerShown:false
+        }}
+        name='SignUp' 
+        component={SignUp}/>
+
+        <Stack.Screen
+        name='index'
+        options={{
+          headerShown:false
+          }}
+        component={Index}
+        />
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 }

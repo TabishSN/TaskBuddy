@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons'; // Import the specific icon
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-export default function HomeScreen() {
+const Index = () => {
   return (
     <View>
       <Text> agyawdyawy</Text>
@@ -42,3 +42,5 @@ const styles = StyleSheet.create({
   }
   
 });
+
+export default Index;

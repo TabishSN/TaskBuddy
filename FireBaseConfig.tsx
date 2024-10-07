@@ -9,9 +9,9 @@ import {getAuth} from "firebase/auth"
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCwzmFubM3FDVdE8t2pTyspzW_2INJOmPw",
-  authDomain: "taskbuddy-2c6df.firebaseapp.com",
-  projectId: "taskbuddy-2c6df",
-  storageBucket: "taskbuddy-2c6df.appspot.com",
+  authDomain: "PowerPulse-2c6df.firebaseapp.com",
+  projectId: "PowerPulse-2c6df",
+  storageBucket: "PowerPulse-2c6df.appspot.com",
   messagingSenderId: "49551785421",
   appId: "1:49551785421:web:06c8d0e660c24fa9129884",
   measurementId: "G-E2Z1ZE9YBS"

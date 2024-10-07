@@ -9,8 +9,8 @@ const SplashScreen = () => {
   
   return (
     <View style={styles.container}>
-      {/* <Image style = {styles.splashWave} source={require('@/assets/images/Wave.png')}/> */}
-      <Image style={styles.splashLogo} source={require("@/assets/images/TaskBuddyLogo.png")} />
+      <Image style = {styles.splashWave} source={require('@/assets/images/Wave.png')}/>
+      <Image style={styles.splashLogo} source={require("@/assets/images/PowerPulseLogo.png")} />
       <View style={styles.textContainer}>
         <Text style={styles.splashSubtitle}>Your ultimate companion for staying organized, productive, and connected with friends.</Text>
       </View>
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
   splashLogo: {
     height: 200,
     width: 300,
-    marginTop: 100
   },
   textContainer: {
     alignItems: 'center',
@@ -59,20 +58,20 @@ const styles = StyleSheet.create({
     padding:20,
     paddingLeft:80,
     paddingRight:80,
-    backgroundColor:'#66b3ff',
+    backgroundColor:'#186acb',
     borderRadius: 50,
     marginTop: 20,
     color:'white'
   },
   splashSignUp:{
     borderWidth:1,
-    borderColor:'#66b3ff',
+    borderColor:'#f90a5a',
     fontSize:16,
     padding:20,
     paddingLeft:80,
     paddingRight:80,
     marginTop: 20,
-    color:'#66b3ff'
+    color:'#f90a5a'
   },
   splashCircleBlue:{
     height:300,
@@ -83,10 +82,9 @@ const styles = StyleSheet.create({
     left: 0,
   },
   splashWave:{
-    width:450,
-    height: undefined,
-    aspectRatio: 3,
-    zIndex: -1
+    width:30,
+    height:200,
+    aspectRatio: 2,
   }
 });
 
