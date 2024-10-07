@@ -80,6 +80,25 @@ app.post('/register', async (req, res) => {
     }
 });
 
+app.get('/search', async (req, res) => {
+    const searchTerm = req.query.q; // Get the query from the request
+  
+    if (!searchTerm) {
+      return res.status(400).send('Query is required');
+    }
+  
+    try {
+      const result = await client.query(
+        'SELECT * FROM users WHERE name ILIKE $1 LIMIT 10',
+        [`%${searchTerm}%`]
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error querying database');
+    }
+  });
+
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server started on port ${port}`);
 });
