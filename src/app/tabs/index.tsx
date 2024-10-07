@@ -1,46 +1,118 @@
-import React from 'react';
-import { Image, StyleSheet, Platform, View, Text } from 'react-native';
-import { HelloWave } from '@/src/components/HelloWave';
-import ParallaxScrollView from '@/src/components/ParallaxScrollView';
-import { ThemedText } from '@/src/components/ThemedText';
-import { ThemedView } from '@/src/components/ThemedView';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons'; // Import the specific icon
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, Button } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import axios from 'axios';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Avatar } from '@kolking/react-native-avatar';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
-const Index = () => {
-  return (
-    <View>
-      <Text> agyawdyawy</Text>
-    </View>
-  );
+interface IndexScreenRouteParams {
+  username: string;
 }
 
+const MyStack = createNativeStackNavigator();
+
+type IndexScreenRouteProp = RouteProp<{ Index: IndexScreenRouteParams }, 'Index'>;
+
+const Index = () => {
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const route = useRoute<IndexScreenRouteProp>();
+  const { username } = route.params;
+
+  const [userInput, setUserInput] = useState('');
+  const [response, setResponse] = useState('');
+
+  const handleSend = async () => {
+    try {
+      const res = await axios.post('http://192.168.1.19:5000/chat', { message: userInput });
+      setResponse(res.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.topContainer}>
+        <View style={styles.titleContainer}>
+          <Avatar 
+            style={styles.avatarContainer}
+            size={45}
+            name={username.substring(1)}
+            colorize={true}
+            radius={20}
+            badgeColor={getRandomColor()}
+          />
+        </View>
+      </View>
+      
+      <View style={styles.textBoxContainer}>
+        <TextInput
+          style={styles.textBox}
+          placeholder="Can't find what you're looking for? Ask AI!"
+          placeholderTextColor={Colors.light}
+          value={userInput}
+          onChangeText={setUserInput}
+        />
+        <Button title="Send" onPress={handleSend} />
+      </View>
+
+      {response ? <Text style={styles.responseText}>{response}</Text> : null}
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
+  avatarContainer: {
+    borderRadius: 70,
+  },
+  topContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 40,
+  },
   titleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    color: 'white',
+    width: '100%',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-    backgroundColor: Colors.white,
+  container: {
+    flex: 1,
+    backgroundColor: Colors.black,
+    padding: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  textBoxContainer: {
+    position: 'absolute',
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    right: 0,
+    padding: 16,
+    backgroundColor: '#333',
   },
-  icon: {
-    backgroundColor: '#f0f8ff', // Corrected to be a string
+  textBox: {
+    height: 40,
+    borderColor: Colors.light,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    color: Colors.white,
+    backgroundColor: '#444',
   },
-  container:{
-    backgroundColor: Colors.white,
-  }
-  
+  responseText: {
+    marginTop: 20,
+    color: Colors.white,
+  },
 });
 
 export default Index;

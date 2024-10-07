@@ -32,7 +32,7 @@ const LogIn = () => {
       console.log(response.data); // Handle successful response
       if (response.data.success) {
         Alert.alert('Success', 'Logged in Successfully');
-        navigation.navigate('index' as never)
+        navigation.navigate('index' as never, {username} as never)
       } else {
         Alert.alert('Error', response.data.message);
       }
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     padding: 10,
     height: 50,
-    borderColor: 'gray',
+    borderColor: 'white',
     borderWidth: 1,
     marginHorizontal: 20,
     marginBottom: 20,
@@ -109,12 +109,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     fontSize: 16,
+    color:"white"
   },
   container: {
     flex: 1,
     alignItems: 'center',
     paddingTop: 50,
-    backgroundColor: 'white',
+    backgroundColor: 'black',
   },
   buttonContainer: {
     width: '90%',
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkSignUp: {
-    color: '#007bff',
+    color: 'white',
     fontSize: 16,
   },
   linkSignUpContainer: {

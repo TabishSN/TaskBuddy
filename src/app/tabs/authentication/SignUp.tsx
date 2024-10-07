@@ -125,12 +125,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingTop:50,
-    backgroundColor: Colors.white
+    backgroundColor: Colors.black
   },
   inputContainer: {
     padding:10,
     height:50,
-    borderColor: 'gray',
+    borderColor: 'white',
     borderWidth: 1,
     marginHorizontal: 20,
     marginBottom: 20,
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
   input:{
     flex:1,
     paddingHorizontal:10,
-    fontSize:16
+    fontSize:16,
+    color:"grey"
   },
   buttonContainer:{
     backgroundColor: '#007bff',
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   linkText: {
-    color: 'blue',
+    color: 'white',
     textDecorationLine: 'underline',
   },
 });
