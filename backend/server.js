@@ -88,13 +88,14 @@ app.get('/search', async (req, res) => {
     }
   
     try {
-      const result = await client.query(
-        'SELECT * FROM users WHERE name ILIKE $1 LIMIT 10',
+      // Use pool.query instead of client.query
+      const result = await pool.query(
+        'SELECT * FROM users WHERE username ILIKE $1 LIMIT 10',
         [`%${searchTerm}%`]
       );
       res.json(result.rows);
     } catch (err) {
-      console.error(err);
+      console.error('Error querying database:', err);
       res.status(500).send('Error querying database');
     }
   });
