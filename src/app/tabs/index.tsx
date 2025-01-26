@@ -1,8 +1,7 @@
-// Index.tsx
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import axios from 'axios';
+import axios from 'axios'; // Don't need to import AxiosResponse separately
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Avatar } from '@kolking/react-native-avatar';
 import SearchBar from '@/src/components/searchbar';
@@ -13,6 +12,11 @@ interface IndexScreenRouteParams {
 }
 
 type IndexScreenRouteProp = RouteProp<{ Index: IndexScreenRouteParams }, 'Index'>;
+
+// Define the expected response structure
+interface ChatResponse {
+  response: string;
+}
 
 const Index = () => {
   const getRandomColor = () => {
@@ -31,8 +35,9 @@ const Index = () => {
     if (userInput.trim() === '') return; // Ensure input isn't empty
     setLoading(true);
     try {
-      const res = await axios.post('http://192.168.1.19:5000/chat', { message: userInput });
-      setResponse(res.data.response);
+      // Directly use AxiosResponse as a generic here
+      const res = await axios.post<ChatResponse>('http://192.168.1.19:5000/chat', { message: userInput });
+      setResponse(res.data.response); // Now TypeScript knows res.data is of type ChatResponse
       setUserInput(''); // Clear input field
     } catch (error) {
       console.error(error);
