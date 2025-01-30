@@ -7,15 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-
-CREATE TABLE IF NOT EXISTS users (
-    id uuid PRIMARY KEY default uuid_generate_v4(),
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    username VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS posts (
     id uuid PRIMARY KEY default uuid_generate_v4(),
     user_id uuid REFERENCES users(id),

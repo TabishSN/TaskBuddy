@@ -16,12 +16,6 @@ type RootStackParamList = {
 
 type IndexScreenRouteProp = RouteProp<RootStackParamList, 'Index'>;
 
-interface ApiResponse<T> {
-  success: boolean;
-  stats: T;
-  message?: string;
-}
-
 interface Stats {
   workouts_completed: number;
   achievements_earned: number;
@@ -66,7 +60,7 @@ const Index = () => {
 
   const fetchUserStats = async () => {
     try {
-      const response = await axios.get<ApiResponse<Stats>>(`http://204.236.195.55:8000/user-stats/${userId}`);
+      const response = await axios.get<{ success: boolean; stats: Stats }>(`http://204.236.195.55:8000/user-stats/${userId}`);
       if (response.data.success) {
         setStats(response.data.stats);
       }
@@ -77,7 +71,7 @@ const Index = () => {
 
   const completeWorkout = async (workoutType: string) => {
     try {
-      const response = await axios.post<ApiResponse<Stats>>('http://204.236.195.55:8000/complete-workout', {
+      const response = await axios.post<{ success: boolean; stats: Stats }>('http://204.236.195.55:8000/complete-workout', {
         userId,
         workoutType
       });
@@ -101,7 +95,7 @@ const Index = () => {
           <Avatar
             size={40}
             name={username || 'User'}
-            backgroundColor="#ff3b30"
+            style={{ backgroundColor: '#ff3b30' }}
           />
         </View>
         

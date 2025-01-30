@@ -32,6 +32,13 @@ interface Comment {
   created_at: string;
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  posts?: T[];
+  comments?: T[];
+  message?: string;
+}
+
 export default function Social() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
@@ -40,7 +47,7 @@ export default function Social() {
   const [comments, setComments] = useState<{ [key: string]: Comment[] }>({});
   const [newComment, setNewComment] = useState('');
   
-  const route = useRoute();
+  const route = useRoute<any>();
   const userId = route.params?.id;
 
   useEffect(() => {
@@ -49,8 +56,10 @@ export default function Social() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://204.236.195.55:8000/posts');
-      setPosts(response.data.posts);
+      const response = await axios.get<ApiResponse<Post>>('http://204.236.195.55:8000/posts');
+      if (response.data.success && response.data.posts) {
+        setPosts(response.data.posts);
+      }
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
@@ -65,12 +74,14 @@ export default function Social() {
   const createPost = async () => {
     if (!newPost.trim()) return;
     try {
-      await axios.post('http://204.236.195.55:8000/posts', {
+      const response = await axios.post<ApiResponse<Post>>('http://204.236.195.55:8000/posts', {
         user_id: userId,
         content: newPost,
       });
-      setNewPost('');
-      fetchPosts();
+      if (response.data.success) {
+        setNewPost('');
+        fetchPosts();
+      }
     } catch (error) {
       console.error('Error creating post:', error);
     }
@@ -78,10 +89,12 @@ export default function Social() {
 
   const likePost = async (postId: string) => {
     try {
-      await axios.post(`http://204.236.195.55:8000/posts/${postId}/like`, {
+      const response = await axios.post<ApiResponse<null>>(`http://204.236.195.55:8000/posts/${postId}/like`, {
         user_id: userId,
       });
-      fetchPosts();
+      if (response.data.success) {
+        fetchPosts();
+      }
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -89,8 +102,10 @@ export default function Social() {
 
   const fetchComments = async (postId: string) => {
     try {
-      const response = await axios.get(`http://204.236.195.55:8000/posts/${postId}/comments`);
-      setComments(prev => ({ ...prev, [postId]: response.data.comments }));
+      const response = await axios.get<ApiResponse<Comment>>(`http://204.236.195.55:8000/posts/${postId}/comments`);
+      if (response.data.success && response.data.comments) {
+        setComments(prev => ({ ...prev, [postId]: response.data.comments! }));
+      }
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -99,13 +114,15 @@ export default function Social() {
   const addComment = async (postId: string) => {
     if (!newComment.trim()) return;
     try {
-      await axios.post(`http://204.236.195.55:8000/posts/${postId}/comment`, {
+      const response = await axios.post<ApiResponse<Comment>>(`http://204.236.195.55:8000/posts/${postId}/comment`, {
         user_id: userId,
         content: newComment,
       });
-      setNewComment('');
-      fetchComments(postId);
-      fetchPosts();
+      if (response.data.success) {
+        setNewComment('');
+        fetchComments(postId);
+        fetchPosts();
+      }
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -145,7 +162,11 @@ export default function Social() {
       {posts.map(post => (
         <View key={post.id} style={styles.post}>
           <View style={styles.postHeader}>
-            <Avatar size={40} name={post.username} backgroundColor="#ff3b30" />
+            <Avatar 
+              size={40} 
+              name={post.username}
+              style={{ backgroundColor: '#ff3b30' }}
+            />
             <View style={styles.postHeaderText}>
               <Text style={styles.username}>{post.username}</Text>
               <Text style={styles.timestamp}>{formatDate(post.created_at)}</Text>
@@ -199,7 +220,11 @@ export default function Social() {
               
               {comments[post.id]?.map(comment => (
                 <View key={comment.id} style={styles.comment}>
-                  <Avatar size={30} name={comment.username} backgroundColor="#666" />
+                  <Avatar 
+                    size={30} 
+                    name={comment.username}
+                    style={{ backgroundColor: '#666' }}
+                  />
                   <View style={styles.commentContent}>
                     <Text style={styles.commentUsername}>{comment.username}</Text>
                     <Text style={styles.commentText}>{comment.content}</Text>
