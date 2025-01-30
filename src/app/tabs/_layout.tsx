@@ -1,69 +1,52 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faDumbbell, faChartLine, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SplashScreen from './SplashScreen';
+import SignUp from './authentication/SignUp';
+import LogIn from './authentication/LogIn';
+import TabLayout from './_layout';
 
-export default function TabLayout() {
+// Create the stack navigator
+const Stack = createNativeStackNavigator();
+
+export default function RootLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#ff3b30',
-        tabBarInactiveTintColor: '#888',
-        tabBarStyle: {
-          backgroundColor: '#000',
-          borderTopColor: '#222',
-          borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
+    <Stack.Navigator>
+      {/* Splash Screen */}
+      <Stack.Screen
+        name="SplashScreen"
+        component={SplashScreen}
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <FontAwesomeIcon icon={faHome} color={color} size={24} />
-          ),
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="workouts"
+
+      {/* Log In Screen */}
+      <Stack.Screen
+        name="LogIn"
+        component={LogIn}
         options={{
-          title: 'Workouts',
-          tabBarIcon: ({ color }) => (
-            <FontAwesomeIcon icon={faDumbbell} color={color} size={24} />
-          ),
+          headerShown: false,
+          headerBackTitle: 'Go Back',
+          headerBackTitleStyle: { fontSize: 20 },
         }}
       />
-      <Tabs.Screen
-        name="social"
+
+      {/* Sign Up Screen */}
+      <Stack.Screen
+        name="SignUp"
+        component={SignUp}
         options={{
-          title: 'Social',
-          tabBarIcon: ({ color }) => (
-            <FontAwesomeIcon icon={faUsers} color={color} size={24} />
-          ),
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="progress"
+
+      {/* Main Tab Navigation */}
+      <Stack.Screen
+        name="(tabs)"
+        component={TabLayout}
         options={{
-          title: 'Progress',
-          tabBarIcon: ({ color }) => (
-            <FontAwesomeIcon icon={faChartLine} color={color} size={24} />
-          ),
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <FontAwesomeIcon icon={faUser} color={color} size={24} />
-          ),
-        }}
-      />
-    </Tabs>
+    </Stack.Navigator>
   );
 }

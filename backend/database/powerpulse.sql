@@ -31,3 +31,13 @@ CREATE TABLE IF NOT EXISTS comments (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS friendships (
+    id uuid PRIMARY KEY default uuid_generate_v4(),
+    from_user_id uuid REFERENCES users(id),
+    to_user_id uuid REFERENCES users(id),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'accepted', 'rejected')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(from_user_id, to_user_id)
+);

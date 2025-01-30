@@ -161,18 +161,72 @@ app.get('/search', async (req, res) => {
     const searchTerm = req.query.q;
 
     if (!searchTerm) {
-        return res.status(400).send('Query is required');
+        return res.status(400).json({ success: false, message: 'Search term is required' });
     }
 
     try {
         const result = await pool.query(
-            'SELECT * FROM users WHERE username ILIKE $1 LIMIT 10',
+            'SELECT id, username, email FROM users WHERE username ILIKE $1 LIMIT 10',
             [`%${searchTerm}%`]
         );
-        res.json(result.rows);
+        
+        // Get friendship status for each user
+        const users = await Promise.all(result.rows.map(async (user) => {
+            const friendshipStatus = await pool.query(
+                `SELECT status FROM friendships 
+                 WHERE (from_user_id = $1 OR to_user_id = $1) 
+                 AND (from_user_id = $2 OR to_user_id = $2)
+                 LIMIT 1`,
+                [req.query.currentUserId, user.id]
+            );
+            
+            return {
+                ...user,
+                friendshipStatus: friendshipStatus.rows[0]?.status || null
+            };
+        }));
+
+        res.json({ success: true, users });
     } catch (err) {
-        console.error('Error querying database:', err);
-        res.status(500).send('Error querying database');
+        console.error('Error searching users:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.post('/friendships', async (req, res) => {
+    const { from_user_id, to_user_id } = req.body;
+
+    if (!from_user_id || !to_user_id) {
+        return res.status(400).json({ success: false, message: 'Both users are required' });
+    }
+
+    try {
+        // Check if friendship already exists
+        const existingFriendship = await pool.query(
+            `SELECT * FROM friendships 
+             WHERE (from_user_id = $1 AND to_user_id = $2)
+             OR (from_user_id = $2 AND to_user_id = $1)`,
+            [from_user_id, to_user_id]
+        );
+
+        if (existingFriendship.rows.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Friendship request already exists' 
+            });
+        }
+
+        // Create new friendship request
+        await pool.query(
+            `INSERT INTO friendships (from_user_id, to_user_id, status) 
+             VALUES ($1, $2, 'pending')`,
+            [from_user_id, to_user_id]
+        );
+
+        res.json({ success: true, message: 'Friend request sent successfully' });
+    } catch (err) {
+        console.error('Error creating friendship:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
 

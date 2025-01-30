@@ -8,74 +8,47 @@ import {
   TextInput,
   ActivityIndicator,
   Platform,
+  Alert,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import { Avatar } from '@kolking/react-native-avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faSearch, faUserPlus } from '@fortawesome/free-solid-svg-icons';
-
-// Define route params type
-type ProfileScreenParams = {
-  Profile: {
-    username: string;
-  };
-};
-
-type ProfileScreenRouteProp = RouteProp<ProfileScreenParams, 'Profile'>;
+import { faSearch, faUserPlus, faCheck, faClock } from '@fortawesome/free-solid-svg-icons';
 
 interface User {
   id: string;
   username: string;
-  experience_level: string;
-  avatar_url?: string;
-  friendshipStatus?: 'pending' | 'accepted' | 'rejected';
+  email: string;
+  friendshipStatus?: 'pending' | 'accepted' | null;
 }
 
-interface Discipline {
-  id: string;
-  name: string;
-  icon: string;
-}
-
-const Profile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+export default function Profile() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const route = useRoute<ProfileScreenRouteProp>();
+  const route = useRoute<any>();
   const username = route.params?.username;
 
   useEffect(() => {
     if (username) {
       fetchUserProfile();
-      fetchUserDisciplines();
     }
   }, [username]);
 
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<User>(`http://localhost:8000/api/users/${username}`);
-      setUser(response.data);
-    } catch (err) {
-      setError('Failed to load profile');
-      console.error(err);
+      const response = await axios.get(`http://204.236.195.55:8000/users/${username}`);
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      Alert.alert('Error', 'Failed to load profile');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchUserDisciplines = async () => {
-    try {
-      const response = await axios.get<Discipline[]>(`http://localhost:8000/api/users/${username}/disciplines`);
-      setDisciplines(response.data);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -86,19 +59,25 @@ const Profile = () => {
     }
 
     try {
-      const response = await axios.get<User[]>(`http://localhost:8000/api/users/search?q=${query}`);
+      setLoading(true);
+      const response = await axios.get(`http://204.236.195.55:8000/search?q=${query}`);
       setSearchResults(response.data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      Alert.alert('Error', 'Failed to search users');
+    } finally {
+      setLoading(false);
     }
-  }, 300);
+  }, 500);
 
   const sendFriendRequest = async (userId: string) => {
     try {
-      await axios.post(`http://localhost:8000/api/friendships`, {
-        addressee_id: userId
+      await axios.post(`http://204.236.195.55:8000/friendships`, {
+        from_user_id: currentUser?.id,
+        to_user_id: userId
       });
-      // Update UI to show pending request
+      
+      // Update the search results to show pending status
       setSearchResults(prev => 
         prev.map(user => 
           user.id === userId 
@@ -106,26 +85,24 @@ const Profile = () => {
             : user
         )
       );
-    } catch (err) {
-      console.error(err);
+      
+      Alert.alert('Success', 'Friend request sent!');
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      Alert.alert('Error', 'Failed to send friend request');
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ff3b30" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
+  const getFriendshipStatusIcon = (status: string | null | undefined) => {
+    switch (status) {
+      case 'pending':
+        return <FontAwesomeIcon icon={faClock} size={20} color="#FFA500" />;
+      case 'accepted':
+        return <FontAwesomeIcon icon={faCheck} size={20} color="#4CAF50" />;
+      default:
+        return <FontAwesomeIcon icon={faUserPlus} size={20} color="#ff3b30" />;
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -133,91 +110,74 @@ const Profile = () => {
       <View style={styles.profileHeader}>
         <Avatar
           size={100}
-          name={user?.username || ''}
-          source={user?.avatar_url ? { uri: user.avatar_url } : undefined}
+          name={username || ''}
+          style={{ backgroundColor: '#ff3b30' }}
         />
         <View style={styles.profileInfo}>
-          <Text style={styles.username}>{user?.username}</Text>
-          <Text style={styles.experienceLevel}>{user?.experience_level}</Text>
+          <Text style={styles.username}>{username}</Text>
         </View>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <FontAwesomeIcon icon={faSearch} size={20} color="#888" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search users..."
-          placeholderTextColor="#888"
-          value={searchQuery}
-          onChangeText={(text) => {
-            setSearchQuery(text);
-            searchUsers(text);
-          }}
-        />
-      </View>
+      {/* Search Section */}
+      <View style={styles.searchSection}>
+        <Text style={styles.sectionTitle}>Find Friends</Text>
+        <View style={styles.searchContainer}>
+          <FontAwesomeIcon icon={faSearch} size={20} color="#888" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search users..."
+            placeholderTextColor="#888"
+            value={searchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              searchUsers(text);
+            }}
+          />
+        </View>
 
-      {/* Search Results */}
-      {searchResults.length > 0 && (
-        <View style={styles.searchResults}>
-          {searchResults.map((result) => (
-            <TouchableOpacity
-              key={result.id}
-              style={styles.searchResultItem}
-              onPress={() => sendFriendRequest(result.id)}
+        {loading && (
+          <ActivityIndicator style={styles.loader} color="#ff3b30" />
+        )}
+
+        {searchResults.map((user) => (
+          <View key={user.id} style={styles.searchResultItem}>
+            <View style={styles.userInfo}>
+              <Avatar size={40} name={user.username} style={{ backgroundColor: '#666' }} />
+              <View style={styles.userDetails}>
+                <Text style={styles.searchResultName}>{user.username}</Text>
+                <Text style={styles.userEmail}>{user.email}</Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={[
+                styles.friendActionButton,
+                user.friendshipStatus === 'pending' && styles.pendingButton,
+                user.friendshipStatus === 'accepted' && styles.acceptedButton
+              ]}
+              onPress={() => sendFriendRequest(user.id)}
+              disabled={user.friendshipStatus !== null}
             >
-              <Avatar size={40} name={result.username} />
-              <Text style={styles.searchResultName}>{result.username}</Text>
-              <FontAwesomeIcon icon={faUserPlus} size={20} color="#ff3b30" />
+              {getFriendshipStatusIcon(user.friendshipStatus)}
             </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* Disciplines */}
-      <Text style={styles.sectionTitle}>My Disciplines</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.disciplinesContainer}
-      >
-        {disciplines.map((discipline) => (
-          <View key={discipline.id} style={styles.disciplineCard}>
-            <Text style={styles.disciplineIcon}>{discipline.icon}</Text>
-            <Text style={styles.disciplineName}>{discipline.name}</Text>
           </View>
         ))}
-      </ScrollView>
+      </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  errorText: {
-    color: '#ff3b30',
-    fontSize: 16,
-  },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   profileInfo: {
     marginLeft: 20,
@@ -227,18 +187,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  experienceLevel: {
-    fontSize: 16,
-    color: '#888',
-    marginTop: 4,
+  searchSection: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 15,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#222',
-    margin: 20,
-    padding: 10,
+    padding: 12,
     borderRadius: 10,
+    marginBottom: 20,
   },
   searchInput: {
     flex: 1,
@@ -246,51 +210,46 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-  searchResults: {
-    margin: 20,
-    marginTop: 0,
+  loader: {
+    marginVertical: 20,
   },
   searchResultItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#222',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  searchResultName: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    margin: 20,
-    marginBottom: 10,
-  },
-  disciplinesContainer: {
-    paddingHorizontal: 20,
-  },
-  disciplineCard: {
+    justifyContent: 'space-between',
     backgroundColor: '#222',
     padding: 15,
     borderRadius: 10,
-    marginRight: 10,
+    marginBottom: 10,
+  },
+  userInfo: {
+    flexDirection: 'row',
     alignItems: 'center',
-    minWidth: 100,
+    flex: 1,
   },
-  disciplineIcon: {
-    fontSize: 24,
-    marginBottom: 5,
+  userDetails: {
+    marginLeft: 12,
+    flex: 1,
   },
-  disciplineName: {
+  searchResultName: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  userEmail: {
+    color: '#888',
     fontSize: 14,
-    textAlign: 'center',
+    marginTop: 2,
+  },
+  friendActionButton: {
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: '#333',
+  },
+  pendingButton: {
+    backgroundColor: '#333',
+  },
+  acceptedButton: {
+    backgroundColor: '#1c411e',
   },
 });
-
-export default Profile; 

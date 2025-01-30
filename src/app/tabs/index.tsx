@@ -6,7 +6,6 @@ import axios from 'axios';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { Avatar } from '@kolking/react-native-avatar';
 
-// Define proper types for route params and API responses
 type RootStackParamList = {
   Index: {
     username: string;
@@ -46,11 +45,11 @@ const Index = () => {
   const [stats, setStats] = useState<Stats>({
     workouts_completed: 0,
     achievements_earned: 0,
-    current_streak: 0
+    current_streak: 0,
   });
-  
+
   const route = useRoute<IndexScreenRouteProp>();
-  const { username, id: userId } = route.params || {};
+  const { username, id: userId } = route.params || { username: 'User', id: '' };
 
   useEffect(() => {
     if (userId) {
@@ -60,7 +59,9 @@ const Index = () => {
 
   const fetchUserStats = async () => {
     try {
-      const response = await axios.get<{ success: boolean; stats: Stats }>(`http://204.236.195.55:8000/user-stats/${userId}`);
+      const response = await axios.get<{ success: boolean; stats: Stats }>(
+        `http://204.236.195.55:8000/user-stats/${userId}`
+      );
       if (response.data.success) {
         setStats(response.data.stats);
       }
@@ -71,11 +72,14 @@ const Index = () => {
 
   const completeWorkout = async (workoutType: string) => {
     try {
-      const response = await axios.post<{ success: boolean; stats: Stats }>('http://204.236.195.55:8000/complete-workout', {
-        userId,
-        workoutType
-      });
-      
+      const response = await axios.post<{ success: boolean; stats: Stats }>(
+        'http://204.236.195.55:8000/complete-workout',
+        {
+          userId,
+          workoutType,
+        }
+      );
+
       if (response.data.success) {
         setStats(response.data.stats);
       }
@@ -92,13 +96,9 @@ const Index = () => {
             <Text style={styles.headerTitle}>Combat Training</Text>
             <Text style={styles.headerSubtitle}>Choose your discipline</Text>
           </View>
-          <Avatar
-            size={40}
-            name={username || 'User'}
-            style={{ backgroundColor: '#ff3b30' }}
-          />
+          <Avatar size={40} name={username} style={{ backgroundColor: '#ff3b30' }} />
         </View>
-        
+
         <View style={styles.searchBar}>
           <FontAwesomeIcon icon={faSearch} size={16} color="#888" />
           <TextInput
@@ -111,11 +111,7 @@ const Index = () => {
         </View>
       </View>
 
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.disciplinesScroll}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.disciplinesScroll}>
         {disciplines.map((discipline) => (
           <TouchableOpacity
             key={discipline.id}
@@ -135,8 +131,8 @@ const Index = () => {
         <Text style={styles.sectionTitle}>Training Categories</Text>
         <View style={styles.categoriesGrid}>
           {workoutCategories.map((category) => (
-            <TouchableOpacity 
-              key={category.id} 
+            <TouchableOpacity
+              key={category.id}
               style={styles.categoryCard}
               onPress={() => completeWorkout(category.name)}
             >
