@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faFire, faClock, faDumbbell, faCalendar, faTrophy, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faFire, faClock, faDumbbell, faCalendar, faTrophy, faHeart, faSearch } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import { Avatar } from '@kolking/react-native-avatar';
 
 // Define proper types for route params and API responses
 type RootStackParamList = {
@@ -47,6 +48,7 @@ const workoutCategories = [
 
 const Index = () => {
   const [selectedDiscipline, setSelectedDiscipline] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState<Stats>({
     workouts_completed: 0,
     achievements_earned: 0,
@@ -54,7 +56,7 @@ const Index = () => {
   });
   
   const route = useRoute<IndexScreenRouteProp>();
-  const { id: userId } = route.params;
+  const { username, id: userId } = route.params || {};
 
   useEffect(() => {
     if (userId) {
@@ -91,11 +93,35 @@ const Index = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Combat Training</Text>
-        <Text style={styles.headerSubtitle}>Choose your discipline</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.headerTitle}>Combat Training</Text>
+            <Text style={styles.headerSubtitle}>Choose your discipline</Text>
+          </View>
+          <Avatar
+            size={40}
+            name={username || 'User'}
+            backgroundColor="#ff3b30"
+          />
+        </View>
+        
+        <View style={styles.searchBar}>
+          <FontAwesomeIcon icon={faSearch} size={16} color="#888" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            placeholderTextColor="#888"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
-      <View style={styles.disciplinesGrid}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.disciplinesScroll}
+      >
         {disciplines.map((discipline) => (
           <TouchableOpacity
             key={discipline.id}
@@ -109,7 +135,7 @@ const Index = () => {
             <Text style={styles.disciplineName}>{discipline.name}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       <View style={styles.categoriesSection}>
         <Text style={styles.sectionTitle}>Training Categories</Text>
@@ -120,7 +146,7 @@ const Index = () => {
               style={styles.categoryCard}
               onPress={() => completeWorkout(category.name)}
             >
-              <FontAwesomeIcon icon={category.icon} size={24} color="#fff" />
+              <FontAwesomeIcon icon={category.icon} size={20} color="#fff" />
               <Text style={styles.categoryName}>{category.name}</Text>
             </TouchableOpacity>
           ))}
@@ -154,6 +180,12 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -164,19 +196,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#888',
   },
-  disciplinesGrid: {
+  searchBar: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    backgroundColor: '#222',
     padding: 10,
-    justifyContent: 'space-between',
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#fff',
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  disciplinesScroll: {
+    paddingHorizontal: 20,
   },
   disciplineCard: {
-    width: '48%',
     backgroundColor: '#222',
     borderRadius: 15,
-    padding: 20,
-    marginBottom: 15,
+    padding: 15,
+    marginRight: 15,
     alignItems: 'center',
+    width: 120,
   },
   selectedDiscipline: {
     backgroundColor: '#444',
@@ -184,12 +227,12 @@ const styles = StyleSheet.create({
     borderColor: '#ff3b30',
   },
   disciplineIcon: {
-    fontSize: 32,
-    marginBottom: 10,
+    fontSize: 24,
+    marginBottom: 8,
   },
   disciplineName: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
   },
   categoriesSection: {
@@ -244,4 +287,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Index; 
+export default Index;

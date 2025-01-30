@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faDumbbell, faChartLine, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faDumbbell, faChartLine, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 export default function TabLayout() {
   return (
@@ -34,6 +34,15 @@ export default function TabLayout() {
           title: 'Workouts',
           tabBarIcon: ({ color }) => (
             <FontAwesomeIcon icon={faDumbbell} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="social"
+        options={{
+          title: 'Social',
+          tabBarIcon: ({ color }) => (
+            <FontAwesomeIcon icon={faUsers} color={color} size={24} />
           ),
         }}
       />
