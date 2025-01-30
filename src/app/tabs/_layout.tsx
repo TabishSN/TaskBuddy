@@ -1,43 +1,57 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { TabBarIcon } from '@/src/components/navigation/TabBarIcon';
-import { Colors } from '@/src/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faHome, faDumbbell, faChartLine, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#ff3b30',
+        tabBarInactiveTintColor: '#888',
+        tabBarStyle: {
+          backgroundColor: '#000',
+          borderTopColor: '#222',
+          borderTopWidth: 1,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
         headerShown: false,
       }}>
-        <Tabs.Screen
-        name="SplashScreen"
-        options={{
-          title: 'SplashScreen',
-          tabBarIcon: ({ color, focused }) => (
-            <FontAwesomeIcon icon={faUser} color={color}/>          ),
-        }}
-      />
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <FontAwesomeIcon icon={faUser} color={color}/>          ),
+          tabBarIcon: ({ color }) => (
+            <FontAwesomeIcon icon={faHome} color={color} size={24} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="workouts"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+          title: 'Workouts',
+          tabBarIcon: ({ color }) => (
+            <FontAwesomeIcon icon={faDumbbell} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: 'Progress',
+          tabBarIcon: ({ color }) => (
+            <FontAwesomeIcon icon={faChartLine} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <FontAwesomeIcon icon={faUser} color={color} size={24} />
           ),
         }}
       />

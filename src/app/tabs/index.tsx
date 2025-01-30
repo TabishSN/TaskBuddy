@@ -1,142 +1,247 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faFire, faClock, faDumbbell, faCalendar, faTrophy, faHeart } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import axios from 'axios'; // Don't need to import AxiosResponse separately
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Avatar } from '@kolking/react-native-avatar';
-import SearchBar from '@/src/components/searchbar';
 
-// Define route params for username
-interface IndexScreenRouteParams {
-  username: string;
+// Define proper types for route params and API responses
+type RootStackParamList = {
+  Index: {
+    username: string;
+    id: string;
+  };
+};
+
+type IndexScreenRouteProp = RouteProp<RootStackParamList, 'Index'>;
+
+interface ApiResponse<T> {
+  success: boolean;
+  stats: T;
+  message?: string;
 }
 
-type IndexScreenRouteProp = RouteProp<{ Index: IndexScreenRouteParams }, 'Index'>;
-
-// Define the expected response structure
-interface ChatResponse {
-  response: string;
+interface Stats {
+  workouts_completed: number;
+  achievements_earned: number;
+  current_streak: number;
 }
+
+const disciplines = [
+  { id: 1, name: 'Boxing', icon: '🥊' },
+  { id: 2, name: 'Brazilian Jiu-Jitsu', icon: '🥋' },
+  { id: 3, name: 'Muay Thai', icon: '🏆' },
+  { id: 4, name: 'Wrestling', icon: '🤼' },
+  { id: 5, name: 'MMA', icon: '👊' },
+  { id: 6, name: 'Kickboxing', icon: '🦵' },
+];
+
+const workoutCategories = [
+  { id: 1, name: 'Technique Drills', icon: faFire },
+  { id: 2, name: 'Conditioning', icon: faClock },
+  { id: 3, name: 'Strength Training', icon: faDumbbell },
+  { id: 4, name: 'Flexibility', icon: faCalendar },
+  { id: 5, name: 'Shadow Work', icon: faTrophy },
+  { id: 6, name: 'Partner Drills', icon: faHeart },
+];
 
 const Index = () => {
-  const getRandomColor = () => {
-    const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A8', '#FFAA33', '#33D4FF'];
-    return colors[Math.floor(Math.random() * colors.length)];
+  const [selectedDiscipline, setSelectedDiscipline] = useState<number | null>(null);
+  const [stats, setStats] = useState<Stats>({
+    workouts_completed: 0,
+    achievements_earned: 0,
+    current_streak: 0
+  });
+  
+  const route = useRoute<IndexScreenRouteProp>();
+  const { id: userId } = route.params;
+
+  useEffect(() => {
+    if (userId) {
+      fetchUserStats();
+    }
+  }, [userId]);
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await axios.get<ApiResponse<Stats>>(`http://204.236.195.55:8000/user-stats/${userId}`);
+      if (response.data.success) {
+        setStats(response.data.stats);
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    }
   };
 
-  const route = useRoute<IndexScreenRouteProp>();
-  const { username } = route.params;
-
-  const [userInput, setUserInput] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false); // To show a loading indicator
-
-  const handleSend = async () => {
-    if (userInput.trim() === '') return; // Ensure input isn't empty
-    setLoading(true);
+  const completeWorkout = async (workoutType: string) => {
     try {
-      // Directly use AxiosResponse as a generic here
-      const res = await axios.post<ChatResponse>('http://192.168.1.19:5000/chat', { message: userInput });
-      setResponse(res.data.response); // Now TypeScript knows res.data is of type ChatResponse
-      setUserInput(''); // Clear input field
+      const response = await axios.post<ApiResponse<Stats>>('http://204.236.195.55:8000/complete-workout', {
+        userId,
+        workoutType
+      });
+      
+      if (response.data.success) {
+        setStats(response.data.stats);
+      }
     } catch (error) {
-      console.error(error);
-      setResponse('Error getting response. Try again!');
-    } finally {
-      setLoading(false); // Stop loading indicator
+      console.error('Error completing workout:', error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top container with avatar */}
-      <View style={styles.topContainer}>
-        <View style={styles.titleContainer}>
-          <Avatar
-            style={styles.avatarContainer}
-            size={60} // Adjust size if needed
-            name={username.substring(0, 1)} // Use first letter of username
-            colorize={true}
-            radius={30} // Control radius for roundness
-            badgeColor={getRandomColor()} // Set random badge color
-          />
-          <Text style={styles.username}>{username}</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Combat Training</Text>
+        <Text style={styles.headerSubtitle}>Choose your discipline</Text>
+      </View>
+
+      <View style={styles.disciplinesGrid}>
+        {disciplines.map((discipline) => (
+          <TouchableOpacity
+            key={discipline.id}
+            style={[
+              styles.disciplineCard,
+              selectedDiscipline === discipline.id && styles.selectedDiscipline,
+            ]}
+            onPress={() => setSelectedDiscipline(discipline.id)}
+          >
+            <Text style={styles.disciplineIcon}>{discipline.icon}</Text>
+            <Text style={styles.disciplineName}>{discipline.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.categoriesSection}>
+        <Text style={styles.sectionTitle}>Training Categories</Text>
+        <View style={styles.categoriesGrid}>
+          {workoutCategories.map((category) => (
+            <TouchableOpacity 
+              key={category.id} 
+              style={styles.categoryCard}
+              onPress={() => completeWorkout(category.name)}
+            >
+              <FontAwesomeIcon icon={category.icon} size={24} color="#fff" />
+              <Text style={styles.categoryName}>{category.name}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        <SearchBar />
       </View>
 
-      {/* Textbox input for user */}
-      <View style={styles.textBoxContainer}>
-        <TextInput
-          style={styles.textBox}
-          placeholder="Ask your question..."
-          placeholderTextColor={Colors.light}
-          value={userInput}
-          onChangeText={setUserInput}
-        />
-        <Button title="Send" onPress={handleSend} />
+      <View style={styles.quickStats}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{stats.workouts_completed}</Text>
+          <Text style={styles.statLabel}>Workouts</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{stats.achievements_earned}</Text>
+          <Text style={styles.statLabel}>Achievements</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{stats.current_streak}</Text>
+          <Text style={styles.statLabel}>Streaks</Text>
+        </View>
       </View>
-
-      {/* Loading indicator */}
-      {loading && <ActivityIndicator size="large" color="#00ff00" style={styles.loading} />}
-
-      {/* Display response */}
-      {response ? <Text style={styles.responseText}>{response}</Text> : null}
-    </View>
+    </ScrollView>
   );
 };
 
-// Stylesheet for the component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.black,
-    padding: 16,
+    backgroundColor: '#000',
   },
-  topContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
+  header: {
+    padding: 20,
+    paddingTop: 60,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    borderRadius: 60,
-    marginRight: 10,
-  },
-  username: {
-    color: 'white',
-    fontSize: 22,
+  headerTitle: {
+    fontSize: 32,
     fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
   },
-  textBoxContainer: {
-    padding: 16,
-    backgroundColor: '#333',
-    borderRadius: 10,
+  headerSubtitle: {
+    fontSize: 18,
+    color: '#888',
+  },
+  disciplinesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 10,
+    justifyContent: 'space-between',
+  },
+  disciplineCard: {
+    width: '48%',
+    backgroundColor: '#222',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  selectedDiscipline: {
+    backgroundColor: '#444',
+    borderWidth: 2,
+    borderColor: '#ff3b30',
+  },
+  disciplineIcon: {
+    fontSize: 32,
+    marginBottom: 10,
+  },
+  disciplineName: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  categoriesSection: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 20,
   },
-  textBox: {
-    height: 50,
-    borderColor: '#666',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    color: 'white',
-    backgroundColor: '#444',
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  loading: {
-    marginTop: 20,
+  categoryCard: {
+    width: '48%',
+    backgroundColor: '#333',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    alignItems: 'center',
   },
-  responseText: {
+  categoryName: {
+    color: '#fff',
+    marginTop: 10,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  quickStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 20,
+    backgroundColor: '#222',
     marginTop: 20,
-    color: 'white',
-    fontSize: 16,
+    borderRadius: 15,
+    marginHorizontal: 20,
+    marginBottom: 30,
+  },
+  statCard: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ff3b30',
+  },
+  statLabel: {
+    color: '#888',
+    marginTop: 5,
   },
 });
 
-export default Index;
+export default Index; 
