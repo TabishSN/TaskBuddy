@@ -159,6 +159,7 @@ app.get('/user-stats/:userId', async (req, res) => {
 
 app.get('/search', async (req, res) => {
     const searchTerm = req.query.q;
+    const currentUserId = req.query.currentUserId;
 
     if (!searchTerm) {
         return res.status(400).json({ success: false, message: 'Search term is required' });
@@ -166,27 +167,33 @@ app.get('/search', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT id, username, email FROM users WHERE username ILIKE $1 LIMIT 10',
-            [`%${searchTerm}%`]
+            'SELECT id, username, email FROM users WHERE username ILIKE $1 AND id != $2 LIMIT 10',
+            [`%${searchTerm}%`, currentUserId || '']
         );
         
         // Get friendship status for each user
         const users = await Promise.all(result.rows.map(async (user) => {
-            const friendshipStatus = await pool.query(
-                `SELECT status FROM friendships 
-                 WHERE (from_user_id = $1 OR to_user_id = $1) 
-                 AND (from_user_id = $2 OR to_user_id = $2)
-                 LIMIT 1`,
-                [req.query.currentUserId, user.id]
-            );
-            
+            if (currentUserId) {
+                const friendshipStatus = await pool.query(
+                    `SELECT status FROM friendships 
+                     WHERE (from_user_id = $1 AND to_user_id = $2)
+                     OR (from_user_id = $2 AND to_user_id = $1)
+                     LIMIT 1`,
+                    [currentUserId, user.id]
+                );
+                
+                return {
+                    ...user,
+                    friendshipStatus: friendshipStatus.rows[0]?.status || null
+                };
+            }
             return {
                 ...user,
-                friendshipStatus: friendshipStatus.rows[0]?.status || null
+                friendshipStatus: null
             };
         }));
 
-        res.json({ success: true, users });
+        res.json(users);
     } catch (err) {
         console.error('Error searching users:', err);
         res.status(500).json({ success: false, message: 'Internal server error' });
@@ -227,6 +234,77 @@ app.post('/friendships', async (req, res) => {
     } catch (err) {
         console.error('Error creating friendship:', err);
         res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.post('/users/:userId/profile-pictures', async (req, res) => {
+    const { userId } = req.params;
+    const { imageUrl } = req.body;
+
+    if (!userId || !imageUrl) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'User ID and image URL are required' 
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE users 
+             SET profile_pictures = COALESCE(profile_pictures, '[]'::jsonb) || $1::jsonb
+             WHERE id = $2
+             RETURNING profile_pictures`,
+            [JSON.stringify([imageUrl]), userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                profile_pictures: result.rows[0].profile_pictures
+            }
+        });
+    } catch (error) {
+        console.error('Error updating profile pictures:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Internal server error' 
+        });
+    }
+});
+
+app.get('/users/:username', async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        const result = await pool.query(
+            'SELECT id, username, email, profile_pictures FROM users WHERE username = $1',
+            [username]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 });
 

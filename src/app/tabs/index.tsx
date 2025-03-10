@@ -30,26 +30,51 @@ const disciplines = [
   { id: 6, name: 'Kickboxing', icon: '🦵' },
 ];
 
-const workoutCategories = [
-  { id: 1, name: 'Technique Drills', icon: faFire },
-  { id: 2, name: 'Conditioning', icon: faClock },
-  { id: 3, name: 'Strength Training', icon: faDumbbell },
-  { id: 4, name: 'Flexibility', icon: faCalendar },
-  { id: 5, name: 'Shadow Work', icon: faTrophy },
-  { id: 6, name: 'Partner Drills', icon: faHeart },
-];
+const disciplineCategories = {
+  'Boxing': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Conditioning', icon: faClock },
+    { id: 3, name: 'Shadow Work', icon: faTrophy },
+  ],
+  'Brazilian Jiu-Jitsu': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Partner Drills', icon: faHeart },
+    { id: 3, name: 'Strength Training', icon: faDumbbell },
+  ],
+  'Muay Thai': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Conditioning', icon: faClock },
+    { id: 3, name: 'Partner Drills', icon: faHeart },
+  ],
+  'Wrestling': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Strength Training', icon: faDumbbell },
+    { id: 3, name: 'Partner Drills', icon: faHeart },
+  ],
+  'MMA': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Conditioning', icon: faClock },
+    { id: 3, name: 'Strength Training', icon: faDumbbell },
+    { id: 4, name: 'Partner Drills', icon: faHeart },
+  ],
+  'Kickboxing': [
+    { id: 1, name: 'Technique Drills', icon: faFire },
+    { id: 2, name: 'Conditioning', icon: faClock },
+    { id: 3, name: 'Shadow Work', icon: faTrophy },
+  ],
+};
 
 const Index = () => {
-  const [selectedDiscipline, setSelectedDiscipline] = useState<number | null>(null);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState<Stats>({
     workouts_completed: 0,
     achievements_earned: 0,
-    current_streak: 0,
+    current_streak: 0
   });
-
+  
   const route = useRoute<IndexScreenRouteProp>();
-  const { username, id: userId } = route.params || { username: 'User', id: '' };
+  const { username, id: userId } = route.params || {};
 
   useEffect(() => {
     if (userId) {
@@ -59,9 +84,7 @@ const Index = () => {
 
   const fetchUserStats = async () => {
     try {
-      const response = await axios.get<{ success: boolean; stats: Stats }>(
-        `http://204.236.195.55:8000/user-stats/${userId}`
-      );
+      const response = await axios.get<{ success: boolean; stats: Stats }>(`http://204.236.195.55:8000/user-stats/${userId}`);
       if (response.data.success) {
         setStats(response.data.stats);
       }
@@ -72,20 +95,22 @@ const Index = () => {
 
   const completeWorkout = async (workoutType: string) => {
     try {
-      const response = await axios.post<{ success: boolean; stats: Stats }>(
-        'http://204.236.195.55:8000/complete-workout',
-        {
-          userId,
-          workoutType,
-        }
-      );
-
+      const response = await axios.post<{ success: boolean; stats: Stats }>('http://204.236.195.55:8000/complete-workout', {
+        userId,
+        workoutType
+      });
+      
       if (response.data.success) {
         setStats(response.data.stats);
       }
     } catch (error) {
       console.error('Error completing workout:', error);
     }
+  };
+
+  const getCategories = () => {
+    if (!selectedDiscipline) return [];
+    return disciplineCategories[selectedDiscipline as keyof typeof disciplineCategories] || [];
   };
 
   return (
@@ -96,9 +121,13 @@ const Index = () => {
             <Text style={styles.headerTitle}>Combat Training</Text>
             <Text style={styles.headerSubtitle}>Choose your discipline</Text>
           </View>
-          <Avatar size={40} name={username} style={{ backgroundColor: '#ff3b30' }} />
+          <Avatar
+            size={40}
+            name={username || 'User'}
+            style={{ backgroundColor: '#ff3b30' }}
+          />
         </View>
-
+        
         <View style={styles.searchBar}>
           <FontAwesomeIcon icon={faSearch} size={16} color="#888" />
           <TextInput
@@ -111,15 +140,19 @@ const Index = () => {
         </View>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.disciplinesScroll}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.disciplinesScroll}
+      >
         {disciplines.map((discipline) => (
           <TouchableOpacity
             key={discipline.id}
             style={[
               styles.disciplineCard,
-              selectedDiscipline === discipline.id && styles.selectedDiscipline,
+              selectedDiscipline === discipline.name && styles.selectedDiscipline,
             ]}
-            onPress={() => setSelectedDiscipline(discipline.id)}
+            onPress={() => setSelectedDiscipline(discipline.name)}
           >
             <Text style={styles.disciplineIcon}>{discipline.icon}</Text>
             <Text style={styles.disciplineName}>{discipline.name}</Text>
@@ -128,11 +161,13 @@ const Index = () => {
       </ScrollView>
 
       <View style={styles.categoriesSection}>
-        <Text style={styles.sectionTitle}>Training Categories</Text>
+        <Text style={styles.sectionTitle}>
+          {selectedDiscipline ? `${selectedDiscipline} Training` : 'Select a Discipline'}
+        </Text>
         <View style={styles.categoriesGrid}>
-          {workoutCategories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
+          {getCategories().map((category) => (
+            <TouchableOpacity 
+              key={category.id} 
               style={styles.categoryCard}
               onPress={() => completeWorkout(category.name)}
             >

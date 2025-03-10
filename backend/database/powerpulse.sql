@@ -5,8 +5,10 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     username VARCHAR(100) NOT NULL,
+    profile_pictures JSONB DEFAULT '[]',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
+
 CREATE TABLE IF NOT EXISTS posts (
     id uuid PRIMARY KEY default uuid_generate_v4(),
     user_id uuid REFERENCES users(id),
